@@ -434,7 +434,7 @@
     <string>by time</string>
    </property>
    <property name="checked">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QRadioButton" name="radioButton_2">
@@ -448,6 +448,9 @@
    </property>
    <property name="text">
     <string>by num</string>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
    </property>
   </widget>
   <widget class="QLineEdit" name="lineEdit_4">
@@ -466,8 +469,8 @@
   <widget class="QPushButton" name="pushButton_5">
    <property name="geometry">
     <rect>
-     <x>640</x>
-     <y>530</y>
+     <x>650</x>
+     <y>540</y>
      <width>81</width>
      <height>29</height>
     </rect>
@@ -487,6 +490,51 @@
    </property>
    <property name="text">
     <string>定时发送</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBox_5">
+   <property name="geometry">
+    <rect>
+     <x>640</x>
+     <y>480</y>
+     <width>98</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>开启绘图</string>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_6">
+   <property name="geometry">
+    <rect>
+     <x>640</x>
+     <y>500</y>
+     <width>81</width>
+     <height>29</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>清除数据</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBox_6">
+   <property name="geometry">
+    <rect>
+     <x>630</x>
+     <y>110</y>
+     <width>98</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>自动滚动</string>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
    </property>
   </widget>
  </widget>

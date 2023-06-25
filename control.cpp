@@ -21,15 +21,24 @@ control::control(QWidget *parent) :
     series = new QSplineSeries();
     axisX = new QValueAxis();
     axisY = new QValueAxis();
-
+    linesNum = 2;
+    MAXlinesNum = 16;
+    for(int i=0;i<MAXlinesNum;i++){
+        QSplineSeries * temp =new QSplineSeries();
+        SeriesList.append(temp);
+    }
+    chartinit();
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(updateChart()));
-    timer->start(100);
-    chartinit();
+//    timer->start(100);
+
 }
 
 control::~control()
 {
+    for(int i=0;i<MAXlinesNum;i++){
+        delete SeriesList[i];
+    }
     delete ui;
 
 }
@@ -39,12 +48,11 @@ void control::chartinit(){
 //    QPen peny(Qt::darkRed , 3 , Qt::SolidLine , Qt::RoundCap , Qt::RoundJoin);
 
     chart->legend()->hide();        //隐藏图例
-    chart->addSeries(series);       //把线添加到chart中
     axisX->setTickCount(11);   //设置坐标轴格数
     axisY->setTickCount(5);
 
-    axisY->setMin(0);       //设置最小值
-    axisY->setMax(100);
+    axisY->setMin(-1);       //设置最小值
+    axisY->setMax(1);
     axisX->setMin(0);       //设置最小值
     axisX->setMax(100);
 
@@ -55,10 +63,17 @@ void control::chartinit(){
     chart->addAxis(axisX , Qt::AlignBottom);
     chart->addAxis(axisY , Qt::AlignLeft);
 
-    series->attachAxis(axisX);
-    series->attachAxis(axisY);
-    series->setPointsVisible(true);
+//    chart->addSeries(series);       //把线添加到chart中
 
+//    series->attachAxis(axisX);
+//    series->attachAxis(axisY);
+//    series->setPointsVisible(true);
+    for(int i=0;i<linesNum;i++){
+        chart->addSeries(SeriesList[i]);
+        SeriesList[i]->attachAxis(axisX);
+        SeriesList[i]->attachAxis(axisY);
+        SeriesList[i]->setPointsVisible(true);
+    }
     axisY->setTitleText("y1");
     axisY->setTitleText("x");
 
@@ -67,13 +82,31 @@ void control::chartinit(){
     ui->widget->setChart(chart);
     ui->widget->setRenderHint(QPainter::Antialiasing);
 
+
 }
 void control::updateChart(){
-    int nCount = series->points().size();
-        chart->axisX()->setMin(nCount - 100);
-        chart->axisX()->setMax(nCount);
+    if(ui->checkBox_5->isChecked()){
+        QStringList datas = nowData.split(",");
 
-        series->append(QPointF(nCount, rand()%40));
+        int nCount = SeriesList[0]->points().size();
+//        chart->axisX()->setMin(nCount - 100);
+//        chart->axisX()->setMax(nCount);
+        float temp = 0;
+        for(int i=0;i<linesNum;i++){
+
+//            SeriesList[i]->append(QPointF(nCount, rand()%40));
+            if(i<datas.count()){
+                temp = datas[i].toFloat();
+            }
+            else{
+                temp = 0;
+            }
+            SeriesList[i]->append(QPointF(nCount,temp));
+        }
+//        series->append(QPointF(nCount, rand()%40));
+
+    }
+
 
 }
 void control::UpdateSerialports(){
@@ -148,19 +181,34 @@ void control::readData(){
         buf = serialport1->readAll();
         if(!buf.isEmpty())
         {
-            QString str = ui->textEdit->toPlainText();
-            str+=tr(buf);
-            ui->textEdit->clear();
-            ui->textEdit->append(str);
+//            QString str = ui->textEdit->toPlainText();
 
+            nowData = tr(buf);
+            if(nowData.at(nowData.size() - 1)=='\n'){
+                nowData = NotComplete+nowData;
+                NotComplete.clear();
+                ui->textEdit_2->setText(nowData);
+                if(ui->radioButton_2->isChecked()){
+                    updateChart();
+                }
+            }
+            else{
+                NotComplete += nowData;
+            }
+//            str+=tr(buf);
+//            ui->textEdit->clear();
+            ui->textEdit->insertPlainText(nowData);
+            if(ifautoscoll){
+                ui->textEdit->moveCursor(QTextCursor::End);
+            }
         }
         buf.clear();
     }
     else{
         const QByteArray info = serialport1->readAll();
-            QByteArray hexData = info.toHex();
+            QByteArray buf = info.toHex();
             QString string;
-            string.prepend(hexData);
+            string.prepend(buf);
             qDebug()<<"receive info:"<<info;
             ui->textEdit->append(string);
     }
@@ -223,5 +271,84 @@ void control::on_pushButton_3_clicked()
 {
     //clear send
     ui->textEdit_2->clear();
+}
+void control::mouseMoveEvent(QMouseEvent* event){
+    int x, y;
+
+        if (isClicking) {
+            if (xOld == 0 && yOld == 0) {
+
+            } else {
+                x = event->x() - xOld;
+                y = event->y() - yOld;
+                chart->scroll(-x, y);
+            }
+
+            xOld = event->x();
+            yOld = event->y();
+
+            return;
+        }
+
+        QWidget::mouseMoveEvent(event);
+}
+void control::mouseReleaseEvent(QMouseEvent* event){
+
+}
+void control::mousePressEvent(QMouseEvent* event){
+    if (event->button() & Qt::LeftButton) {
+            isClicking = true;
+        } else if (event->button() & Qt::RightButton) {
+            chart->zoomReset();
+        }
+
+        QWidget::mousePressEvent(event);
+}
+void control::wheelEvent(QWheelEvent *event){
+    if (event->angleDelta().y() > 0) {
+            chart->zoom(1.1);
+    } else {
+        chart->zoom(10.0/11);
+    }
+
+    QWidget::wheelEvent(event);
+}
+
+void control::on_pushButton_6_clicked()
+{
+    //clear lines
+    for(int i=0;i<linesNum;i++){
+
+        SeriesList[i]->clear();
+
+    }
+}
+
+
+void control::on_radioButton_2_clicked(bool checked)
+{
+    if(checked){
+        timer->stop();
+    }
+}
+
+
+
+void control::on_radioButton_clicked(bool checked)
+{
+    if(checked){
+        timer->start(100);
+    }
+}
+
+
+void control::on_checkBox_6_stateChanged(int arg1)
+{
+    if(ui->checkBox_6->isChecked()){
+        ifautoscoll = true;
+    }
+    else{
+        ifautoscoll = false;
+    }
 }
 
