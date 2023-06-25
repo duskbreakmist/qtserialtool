@@ -53,8 +53,8 @@ void control::chartinit(){
     axisX->setTickCount(11);   //设置坐标轴格数
     axisY->setTickCount(5);
 
-    axisY->setMin(-1);       //设置最小值
-    axisY->setMax(1);
+    axisY->setMin(-10);       //设置最小值
+    axisY->setMax(10);
     axisX->setMin(0);       //设置最小值
     axisX->setMax(100);
 
@@ -130,7 +130,13 @@ void control::openSerial(){
         case 0:
             serialport1->setParity(QSerialPort::NoParity);
             break;
-        default:
+        case 1:
+            serialport1->setParity(QSerialPort::OddParity);
+            break;
+        case 2:
+            serialport1->setParity(QSerialPort::EvenParity);
+            break;
+        default:serialport1->setParity(QSerialPort::NoParity);
             break;
     }
     //设置数据位
@@ -146,6 +152,7 @@ void control::openSerial(){
                 serialport1->setDataBits(QSerialPort::Data5);
                 break;
             default:
+                serialport1->setDataBits(QSerialPort::Data8);
                 break;
     }
     //设置停止位
@@ -378,7 +385,7 @@ void control::on_checkBox_4_stateChanged(int arg1)
 
 void control::on_lineEdit_4_textChanged(const QString &arg1)
 {
-    if(ui->lineEdit_4->text().isNull()){
+    if(ui->lineEdit_4->text().isEmpty()){
         ui->lineEdit_4->setText("1");
     }
     else{
@@ -388,5 +395,35 @@ void control::on_lineEdit_4_textChanged(const QString &arg1)
         }
     }
 
+}
+
+
+void control::on_lineEdit_2_textChanged(const QString &arg1)
+{
+    //max
+    if(ui->lineEdit_2->text().isEmpty()){
+        ui->lineEdit_2->setText("1");
+    }
+    else{
+        int temp=ui->lineEdit_2->text().toInt();
+        if(temp!=0){
+            chart->axisY()->setMax(temp);
+        }
+    }
+}
+
+
+void control::on_lineEdit_3_textChanged(const QString &arg1)
+{
+    //min
+    if(ui->lineEdit_3->text().isEmpty()){
+        ui->lineEdit_3->setText("1");
+    }
+    else{
+        int temp=ui->lineEdit_3->text().toInt();
+        if(temp!=0){
+            chart->axisY()->setMin(temp);
+        }
+    }
 }
 

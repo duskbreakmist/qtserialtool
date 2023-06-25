@@ -47,6 +47,10 @@ private slots:
 
     void on_lineEdit_4_textChanged(const QString &arg1);
 
+    void on_lineEdit_2_textChanged(const QString &arg1);
+
+    void on_lineEdit_3_textChanged(const QString &arg1);
+
 private:
     Ui::control *ui;
     QSerialPort * serialport1;
