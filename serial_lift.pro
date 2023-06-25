@@ -1,7 +1,7 @@
 QT       += core gui
 QT       += serialport
 QT      += charts
-
+RC_ICONS =boji.ico
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++17
@@ -12,13 +12,16 @@ CONFIG += c++17
 
 SOURCES += \
     control.cpp \
-    main.cpp
+    main.cpp \
+    mychart.cpp
 
 HEADERS += \
-    control.h
+    control.h \
+    mychart.h
 
 FORMS += \
-    control.ui
+    control.ui \
+    mychart.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

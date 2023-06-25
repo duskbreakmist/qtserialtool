@@ -21,7 +21,7 @@ control::control(QWidget *parent) :
     series = new QSplineSeries();
     axisX = new QValueAxis();
     axisY = new QValueAxis();
-    linesNum = 2;
+    linesNum = 3;
     MAXlinesNum = 16;
     for(int i=0;i<MAXlinesNum;i++){
         QSplineSeries * temp =new QSplineSeries();
@@ -187,7 +187,8 @@ void control::readData(){
             if(nowData.at(nowData.size() - 1)=='\n'){
                 nowData = NotComplete+nowData;
                 NotComplete.clear();
-                ui->textEdit_2->setText(nowData);
+                ui->label_15->setText(nowData);
+//                ui->textEdit_2->setText(nowData);
                 if(ui->radioButton_2->isChecked()){
                     updateChart();
                 }
@@ -197,7 +198,11 @@ void control::readData(){
             }
 //            str+=tr(buf);
 //            ui->textEdit->clear();
-            ui->textEdit->insertPlainText(nowData);
+
+            receivNum+= tr(buf).count();
+            ui->label_11->setText(QString::number(receivNum));
+
+            ui->textEdit->insertPlainText(tr(buf));
             if(ifautoscoll){
                 ui->textEdit->moveCursor(QTextCursor::End);
             }
@@ -264,28 +269,36 @@ void control::on_pushButton_2_clicked()
 {
     //clear rec
     ui->textEdit->clear();
+    receivNum = 0;
 }
 
 
 void control::on_pushButton_3_clicked()
 {
     //clear send
+    sendNum = 0;
     ui->textEdit_2->clear();
 }
+
+
+void control::mousePressEvent(QMouseEvent* event){
+    if (event->button() & Qt::LeftButton) {
+            isClicking = true;
+            screenPos = event->globalPosition().toPoint();
+        } else if (event->button() & Qt::RightButton) {
+            chart->zoomReset();
+        }
+
+        QWidget::mousePressEvent(event);
+}
+
 void control::mouseMoveEvent(QMouseEvent* event){
-    int x, y;
-
         if (isClicking) {
-            if (xOld == 0 && yOld == 0) {
+            QPoint tPos = event->globalPosition().toPoint()-screenPos;
 
-            } else {
-                x = event->x() - xOld;
-                y = event->y() - yOld;
-                chart->scroll(-x, y);
-            }
 
-            xOld = event->x();
-            yOld = event->y();
+            chart->scroll(-tPos.x(),tPos.y());
+            screenPos = event->globalPosition().toPoint();
 
             return;
         }
@@ -293,16 +306,7 @@ void control::mouseMoveEvent(QMouseEvent* event){
         QWidget::mouseMoveEvent(event);
 }
 void control::mouseReleaseEvent(QMouseEvent* event){
-
-}
-void control::mousePressEvent(QMouseEvent* event){
-    if (event->button() & Qt::LeftButton) {
-            isClicking = true;
-        } else if (event->button() & Qt::RightButton) {
-            chart->zoomReset();
-        }
-
-        QWidget::mousePressEvent(event);
+    isClicking = false;
 }
 void control::wheelEvent(QWheelEvent *event){
     if (event->angleDelta().y() > 0) {

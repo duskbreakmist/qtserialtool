@@ -7,7 +7,7 @@
 #include <QMessageBox>
 #include <QtCharts>
 #include<QWheelEvent>
-
+#include "mychart.h"
 namespace Ui {
 class control;
 }
@@ -59,11 +59,13 @@ private:
     bool ifopened;
     bool ifautoscoll;
     long long sendNum;
+    long long receivNum;
     QString nowData;
     QString NotComplete;
-    int xOld;
-    int yOld;
+
     bool isClicking;
+    QPoint screenPos;
+
 protected:
     void mouseMoveEvent(QMouseEvent* event);
     void mouseReleaseEvent(QMouseEvent* event);
