@@ -18,7 +18,7 @@ void mychart::mousePressEvent(QMouseEvent* event){
             isClicking = true;
             screenPos = event->globalPosition().toPoint();
         } else if (event->button() & Qt::RightButton) {
-            chart()->zoomReset();
+            //chart()->zoom(chart().)
         }
 
         QWidget::mousePressEvent(event);

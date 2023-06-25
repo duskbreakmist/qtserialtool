@@ -30,7 +30,9 @@ control::control(QWidget *parent) :
     chartinit();
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(updateChart()));
-//    timer->start(100);
+
+    timer2 = new QTimer(this);
+    connect(timer2, SIGNAL(timeout()), this, SLOT(sendData()));
 
 }
 
@@ -86,7 +88,7 @@ void control::chartinit(){
 }
 void control::updateChart(){
     if(ui->checkBox_5->isChecked()){
-        QStringList datas = nowData.split(",");
+        QStringList datas = fullData.split(",");
 
         int nCount = SeriesList[0]->points().size();
 //        chart->axisX()->setMin(nCount - 100);
@@ -184,11 +186,11 @@ void control::readData(){
 //            QString str = ui->textEdit->toPlainText();
 
             nowData = tr(buf);
-            if(nowData.at(nowData.size() - 1)=='\n'){
-                nowData = NotComplete+nowData;
+            if(nowData.size()>0&&nowData.at(nowData.size() - 1)=='\n'){
+                fullData = NotComplete+nowData;
                 NotComplete.clear();
-                ui->label_15->setText(nowData);
-//                ui->textEdit_2->setText(nowData);
+                ui->label_15->setText(fullData);
+
                 if(ui->radioButton_2->isChecked()){
                     updateChart();
                 }
@@ -221,24 +223,25 @@ void control::readData(){
 }
 
 void control::sendData(){
-    long long a=0;
-    //字符串形式
-    if(ui->checkBox->isChecked() == false)
-    {
-        a=serialport1->write(ui->textEdit_2->toPlainText().toLocal8Bit().data());
-    }
-    else    //16进制发送（将16进制转换成Ascll码对应的字符发送）
-    {
-        a=serialport1->write(QByteArray::fromHex(ui->textEdit_2->toPlainText().toUtf8()).data()); //16进制数据解码后发送
-    }
-    //如果发送成功，a获取发送的字节长度，发送失败则返回-1；
+    if(ifopened){
+        long long a=0;
+        //字符串形式
+        if(ui->checkBox->isChecked() == false)
+        {
+            a=serialport1->write(ui->textEdit_2->toPlainText().toLocal8Bit().data());
+        }
+        else    //16进制发送（将16进制转换成Ascll码对应的字符发送）
+        {
+            a=serialport1->write(QByteArray::fromHex(ui->textEdit_2->toPlainText().toUtf8()).data()); //16进制数据解码后发送
+        }
+        //如果发送成功，a获取发送的字节长度，发送失败则返回-1；
 
-    if(a > 0)
-    {
-        sendNum += a;
-        ui->label_10->setText(QString::number(sendNum));
+        if(a > 0)
+        {
+            sendNum += a;
+    //        ui->label_10->setText(QString::number(sendNum));
+        }
     }
-
 }
 void control::on_pushButton_clicked()
 {
@@ -261,7 +264,10 @@ void control::on_pushButton_clicked()
 void control::on_pushButton_4_clicked()
 {
     //send
-    sendData();
+    if(ifopened){
+        sendData();
+    }
+
 }
 
 
@@ -281,42 +287,42 @@ void control::on_pushButton_3_clicked()
 }
 
 
-void control::mousePressEvent(QMouseEvent* event){
-    if (event->button() & Qt::LeftButton) {
-            isClicking = true;
-            screenPos = event->globalPosition().toPoint();
-        } else if (event->button() & Qt::RightButton) {
-            chart->zoomReset();
-        }
+//void control::mousePressEvent(QMouseEvent* event){
+//    if (event->button() & Qt::LeftButton) {
+//            isClicking = true;
+//            screenPos = event->globalPosition().toPoint();
+//        } else if (event->button() & Qt::RightButton) {
+//            chart->zoomReset();
+//        }
 
-        QWidget::mousePressEvent(event);
-}
+//        QWidget::mousePressEvent(event);
+//}
 
-void control::mouseMoveEvent(QMouseEvent* event){
-        if (isClicking) {
-            QPoint tPos = event->globalPosition().toPoint()-screenPos;
+//void control::mouseMoveEvent(QMouseEvent* event){
+//        if (isClicking) {
+//            QPoint tPos = event->globalPosition().toPoint()-screenPos;
 
 
-            chart->scroll(-tPos.x(),tPos.y());
-            screenPos = event->globalPosition().toPoint();
+//            chart->scroll(-tPos.x(),tPos.y());
+//            screenPos = event->globalPosition().toPoint();
 
-            return;
-        }
+//            return;
+//        }
 
-        QWidget::mouseMoveEvent(event);
-}
-void control::mouseReleaseEvent(QMouseEvent* event){
-    isClicking = false;
-}
-void control::wheelEvent(QWheelEvent *event){
-    if (event->angleDelta().y() > 0) {
-            chart->zoom(1.1);
-    } else {
-        chart->zoom(10.0/11);
-    }
+//        QWidget::mouseMoveEvent(event);
+//}
+//void control::mouseReleaseEvent(QMouseEvent* event){
+//    isClicking = false;
+//}
+//void control::wheelEvent(QWheelEvent *event){
+//    if (event->angleDelta().y() > 0) {
+//            chart->zoom(1.1);
+//    } else {
+//        chart->zoom(10.0/11);
+//    }
 
-    QWidget::wheelEvent(event);
-}
+//    QWidget::wheelEvent(event);
+//}
 
 void control::on_pushButton_6_clicked()
 {
@@ -354,5 +360,33 @@ void control::on_checkBox_6_stateChanged(int arg1)
     else{
         ifautoscoll = false;
     }
+}
+
+
+void control::on_checkBox_4_stateChanged(int arg1)
+{
+    if(ui->checkBox_4->isChecked()){
+        if(ui->lineEdit->text().toInt()){
+            timer2->start(ui->lineEdit->text().toInt());
+        }
+    }
+    else{
+        timer2->stop();
+    }
+}
+
+
+void control::on_lineEdit_4_textChanged(const QString &arg1)
+{
+    if(ui->lineEdit_4->text().isNull()){
+        ui->lineEdit_4->setText("1");
+    }
+    else{
+        int temp=ui->lineEdit_4->text().toInt();
+        if(temp!=0){
+            linesNum = temp;
+        }
+    }
+
 }
 

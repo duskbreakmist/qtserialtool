@@ -43,9 +43,15 @@ private slots:
 
     void on_checkBox_6_stateChanged(int arg1);
 
+    void on_checkBox_4_stateChanged(int arg1);
+
+    void on_lineEdit_4_textChanged(const QString &arg1);
+
 private:
     Ui::control *ui;
     QSerialPort * serialport1;
+    QTimer *timer2;
+
 
     QTimer *timer;                           //计时器
     QChart *chart;                           //画布
@@ -60,17 +66,19 @@ private:
     bool ifautoscoll;
     long long sendNum;
     long long receivNum;
+
     QString nowData;
     QString NotComplete;
+    QString fullData;
 
     bool isClicking;
     QPoint screenPos;
 
 protected:
-    void mouseMoveEvent(QMouseEvent* event);
-    void mouseReleaseEvent(QMouseEvent* event);
-    void mousePressEvent(QMouseEvent* event);
-    void wheelEvent(QWheelEvent *event);
+//    void mouseMoveEvent(QMouseEvent* event);
+//    void mouseReleaseEvent(QMouseEvent* event);
+//    void mousePressEvent(QMouseEvent* event);
+//    void wheelEvent(QWheelEvent *event);
 };
 
 
